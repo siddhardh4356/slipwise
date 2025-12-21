@@ -61,7 +61,7 @@ const GlassCard = ({ children, className = '', onClick }: { children: React.Reac
 export default function Dashboard() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'groups' | 'activity'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'groups' | 'activity' | 'settings'>('dashboard');
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [groupExpenses, setGroupExpenses] = useState<Expense[]>([]);
@@ -372,6 +372,101 @@ export default function Dashboard() {
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
+  // Export to CSV
+  const exportToCSV = () => {
+    if (!selectedGroup || groupExpenses.length === 0) {
+      toast.error('No expenses to export');
+      return;
+    }
+
+    const headers = ['Date', 'Description', 'Category', 'Amount', 'Paid By', 'Split Type'];
+    const rows = groupExpenses.map(e => [
+      new Date(e.createdAt).toLocaleDateString(),
+      e.description,
+      EXPENSE_CATEGORIES.find(c => c.id === e.category)?.label || 'Other',
+      e.amount.toString(),
+      e.paidBy.name,
+      e.splitType
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(r => r.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${selectedGroup.name}_expenses_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+
+    toast.success('Expenses exported to CSV!');
+  };
+
+  // Export to PDF
+  const exportToPDF = async () => {
+    if (!selectedGroup || groupExpenses.length === 0) {
+      toast.error('No expenses to export');
+      return;
+    }
+
+    // Dynamic import for PDF libraries
+    const jsPDF = (await import('jspdf')).default;
+    const autoTable = (await import('jspdf-autotable')).default;
+
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(20);
+    doc.setTextColor(69, 40, 41); // #452829
+    doc.text(`${selectedGroup.name} - Expense Report`, 14, 20);
+
+    // Date
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Generated on ${new Date().toLocaleDateString()}`, 14, 28);
+
+    // Summary
+    const totalExpenses = groupExpenses.reduce((sum, e) => sum + e.amount, 0);
+    doc.setFontSize(12);
+    doc.setTextColor(0);
+    doc.text(`Total Expenses: ₹${totalExpenses}`, 14, 40);
+    doc.text(`Number of Transactions: ${groupExpenses.length}`, 14, 48);
+    doc.text(`Members: ${selectedGroup.members.length}`, 14, 56);
+
+    // Table
+    autoTable(doc, {
+      startY: 65,
+      head: [['Date', 'Description', 'Category', 'Amount', 'Paid By']],
+      body: groupExpenses.map(e => [
+        new Date(e.createdAt).toLocaleDateString(),
+        e.description,
+        EXPENSE_CATEGORIES.find(c => c.id === e.category)?.label || 'Other',
+        `₹${e.amount}`,
+        e.paidBy.name
+      ]),
+      headStyles: { fillColor: [69, 40, 41] },
+      alternateRowStyles: { fillColor: [248, 243, 239] },
+    });
+
+    // Balances
+    if (groupBalances.length > 0) {
+      const finalY = (doc as any).lastAutoTable.finalY + 15;
+      doc.setFontSize(14);
+      doc.text('Outstanding Balances:', 14, finalY);
+
+      autoTable(doc, {
+        startY: finalY + 5,
+        head: [['From', 'To', 'Amount']],
+        body: groupBalances.map(b => [b.fromUserName, b.toUserName, `₹${b.amount}`]),
+        headStyles: { fillColor: [87, 89, 91] },
+      });
+    }
+
+    doc.save(`${selectedGroup.name}_report_${new Date().toISOString().split('T')[0]}.pdf`);
+    toast.success('Report exported to PDF!');
+  };
+
   // --- Charts Data ---
   const chartData = [
     { name: 'Food', value: 400 },
@@ -426,6 +521,12 @@ export default function Dashboard() {
         </nav>
 
         <div className="pt-6 border-t border-[#E8D1C5]/10 space-y-4">
+          <button
+            onClick={() => { setActiveTab('settings'); setSelectedGroup(null); }}
+            className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${activeTab === 'settings' ? 'bg-[#E8D1C5] text-[#452829] font-bold' : `${accentText} hover:bg-[#E8D1C5]/10`}`}
+          >
+            <Settings className="w-5 h-5" /> Settings
+          </button>
           <button onClick={toggleTheme} className={`w-full flex items-center gap-3 px-4 py-2 ${accentText} hover:bg-[#E8D1C5]/10 rounded-lg transition-colors`}>
             {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
@@ -656,15 +757,34 @@ export default function Dashboard() {
                     <span className="text-xs opacity-50">Share this code to invite others</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => {
-                    setExpensePayer(currentUser.id); // Default to current user
-                    setShowAddExpense(true);
-                  }}
-                  className="px-6 py-3 bg-[#E8D1C5] text-[#452829] rounded-xl font-bold shadow-lg shadow-[#E8D1C5]/10 hover:shadow-[#E8D1C5]/30 hover:scale-105 transition-all active:scale-95"
-                >
-                  Add Expense
-                </button>
+                <div className="flex gap-3">
+                  {/* Export Buttons */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={exportToCSV}
+                      className={`px-4 py-3 ${theme === 'dark' ? 'bg-[#57595B]/30' : 'bg-white/50'} rounded-xl font-bold hover:bg-[#57595B]/50 transition-all flex items-center gap-2 border border-[#E8D1C5]/10`}
+                      title="Export to CSV"
+                    >
+                      <FileText className="w-5 h-5" /> CSV
+                    </button>
+                    <button
+                      onClick={exportToPDF}
+                      className={`px-4 py-3 ${theme === 'dark' ? 'bg-[#57595B]/30' : 'bg-white/50'} rounded-xl font-bold hover:bg-[#57595B]/50 transition-all flex items-center gap-2 border border-[#E8D1C5]/10`}
+                      title="Export to PDF"
+                    >
+                      <Download className="w-5 h-5" /> PDF
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setExpensePayer(currentUser.id); // Default to current user
+                      setShowAddExpense(true);
+                    }}
+                    className="px-6 py-3 bg-[#E8D1C5] text-[#452829] rounded-xl font-bold shadow-lg shadow-[#E8D1C5]/10 hover:shadow-[#E8D1C5]/30 hover:scale-105 transition-all active:scale-95"
+                  >
+                    Add Expense
+                  </button>
+                </div>
               </div>
 
               {/* Admin Requests Panel */}
@@ -867,6 +987,77 @@ export default function Dashboard() {
                   <li>• Share your group code to invite friends</li>
                   <li>• The app automatically simplifies who owes whom</li>
                 </ul>
+              </GlassCard>
+            </motion.div>
+          )}
+
+          {/* Settings Tab */}
+          {activeTab === 'settings' && (
+            <motion.div
+              key="settings"
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6 max-w-2xl mx-auto"
+            >
+              <h2 className={`text-3xl font-bold ${accentText} mb-6`}>Settings</h2>
+
+              {/* Profile Section */}
+              <GlassCard className={cardStyle}>
+                <h3 className={`text-xl font-bold ${textMain} mb-6 flex items-center gap-2`}>
+                  <Users className="w-5 h-5" /> Profile
+                </h3>
+                <div className="flex items-center gap-6 mb-8">
+                  <div className="w-24 h-24 rounded-full bg-[#E8D1C5] text-[#452829] flex items-center justify-center text-4xl font-bold shadow-lg">
+                    {currentUser.name[0]}
+                  </div>
+                  <div>
+                    <h4 className={`text-2xl font-bold ${textMain}`}>{currentUser.name}</h4>
+                    <p className={`${accentText} opacity-60`}>{currentUser.email}</p>
+                    <button className="mt-2 text-sm text-[#E8D1C5] hover:underline opacity-80 decoration-dotted">
+                      Change Avatar (Coming Soon)
+                    </button>
+                  </div>
+                </div>
+              </GlassCard>
+
+              {/* App Preferences */}
+              <GlassCard className={cardStyle}>
+                <h3 className={`text-xl font-bold ${textMain} mb-6 flex items-center gap-2`}>
+                  <Settings className="w-5 h-5" /> Preferences
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 rounded-xl border border-[#E8D1C5]/10 bg-[#57595B]/5">
+                    <div className="flex items-center gap-3">
+                      {theme === 'dark' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+                      <div>
+                        <p className={`font-bold ${textMain}`}>Appearance</p>
+                        <p className={`text-xs ${accentText} opacity-60`}>Switch between dark and light mode</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={toggleTheme}
+                      className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${theme === 'dark' ? 'bg-[#E8D1C5] text-[#452829]' : 'bg-[#452829] text-[#E8D1C5]'}`}
+                    >
+                      {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                    </button>
+                  </div>
+                </div>
+              </GlassCard>
+
+              {/* About & Support */}
+              <GlassCard className={cardStyle}>
+                <h3 className={`text-xl font-bold ${textMain} mb-6 flex items-center gap-2`}>
+                  <Zap className="w-5 h-5" /> About SlipWise
+                </h3>
+                <div className="space-y-4 text-sm opacity-80">
+                  <p>Version 2.0.0 (Creative Update)</p>
+                  <p>SlipWise makes splitting expenses easy and fun. Now with confetti celebrations!</p>
+                  <div className="pt-4 border-t border-[#E8D1C5]/10">
+                    <button className="text-red-400 hover:text-red-500 font-bold flex items-center gap-2" onClick={handleLogout}>
+                      <LogOut className="w-4 h-4" /> Log Out
+                    </button>
+                  </div>
+                </div>
               </GlassCard>
             </motion.div>
           )}
