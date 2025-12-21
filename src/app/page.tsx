@@ -33,7 +33,7 @@ export default function LandingPage() {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                 >
                     <span className="inline-block px-4 py-1 rounded-full bg-[#57595B]/30 border border-[#E8D1C5]/20 text-[#E8D1C5]/80 text-sm mb-6 backdrop-blur-md">
-                        ✨ Expenses Simplified
+                        Expenses Simplified
                     </span>
                     <h2 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-b from-[#F3E8DF] to-[#E8D1C5] bg-clip-text text-transparent drop-shadow-sm">
                         Split Expenses,<br />Not Friendships.

@@ -47,13 +47,27 @@ export default function LoginPage() {
         e.preventDefault();
         setForgotLoading(true);
 
-        // Simulate sending email (in production, you would call an API endpoint)
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            const res = await fetch('/api/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: forgotEmail }),
+            });
 
-        toast.success('If an account exists with this email, you will receive a password reset link.');
-        setForgotLoading(false);
-        setShowForgotPassword(false);
-        setForgotEmail('');
+            const data = await res.json();
+
+            if (res.ok) {
+                toast.success(data.message);
+                setTimeout(() => setShowForgotPassword(false), 2000);
+            } else {
+                toast.error(data.error || 'Something went wrong');
+            }
+        } catch (err) {
+            toast.error('Failed to send reset link');
+        } finally {
+            setForgotLoading(false);
+            setForgotEmail('');
+        }
     };
 
     return (
