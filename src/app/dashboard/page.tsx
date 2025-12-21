@@ -25,7 +25,7 @@ interface UserBalanceSummary {
   netBalance: number;
 }
 
-type User = { id: string; name: string; email: string };
+type User = { id: string; name: string; email: string; avatar?: string };
 type Group = { id: string; name: string; joinCode: string; created_by_id: string; members: { user: User }[]; _count?: { expenses: number } };
 type Expense = { id: string; description: string; amount: number; paidBy: User; splitType: string; splits: any[]; createdAt: string; category?: string };
 type Balance = { fromUserId: string; fromUserName: string; toUserId: string; toUserName: string; amount: number };
@@ -76,6 +76,7 @@ export default function Dashboard() {
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [showJoinGroup, setShowJoinGroup] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
 
   const [expenseDesc, setExpenseDesc] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
@@ -152,6 +153,14 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('Failed to fetch user stats:', error);
+    }
+  };
+
+  const handleUpdateAvatar = (avatar: string) => {
+    if (currentUser) {
+      setCurrentUser({ ...currentUser, avatar });
+      setShowAvatarModal(false);
+      toast.success('Avatar updated!');
     }
   };
 
@@ -490,7 +499,7 @@ export default function Dashboard() {
   if (!currentUser) return null;
 
   return (
-    <div className={`min-h-screen ${bgMain} ${textMain} flex transition-colors duration-500`}>
+    <div className={`h-screen overflow-hidden ${bgMain} ${textMain} flex transition-colors duration-500`}>
       <Toaster position="bottom-right" />
 
       {/* Sidebar */}
@@ -538,12 +547,14 @@ export default function Dashboard() {
           <div className="flex items-center gap-4 ml-auto">
             <div className="hidden md:flex items-center gap-3 bg-[#E8D1C5]/5 px-4 py-2 rounded-full border border-[#E8D1C5]/10 backdrop-blur-sm">
               <div className="text-right hidden lg:block">
-                <p className={`font-bold text-sm ${textMain}`}>{currentUser.name}</p>
-                <p className={`text-xs ${accentText} opacity-60`}>{currentUser.email}</p>
+                <p className={`font-bold text-lg ${textMain}`}>{currentUser.name}</p>
               </div>
-              <div className="w-9 h-9 rounded-full bg-[#E8D1C5] text-[#452829] flex items-center justify-center font-bold shadow-md">
-                {currentUser.name[0]}
-              </div>
+              <button onClick={() => setShowAvatarModal(true)} className="w-12 h-12 rounded-full bg-[#E8D1C5] text-[#452829] flex items-center justify-center font-bold text-xl shadow-md hover:scale-105 transition-transform overflow-hidden relative">
+                {currentUser.avatar ? <span className="text-2xl">{currentUser.avatar}</span> : currentUser.name[0]}
+                <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
+                  <span className="text-xs text-white">Edit</span>
+                </div>
+              </button>
             </div>
             <button onClick={handleLogout} className="md:hidden"><LogOut className="w-6 h-6" /></button>
           </div>
@@ -1190,6 +1201,39 @@ export default function Dashboard() {
                     Add Expense
                   </button>
                 </form>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Avatar Selection Modal */}
+        <AnimatePresence>
+          {showAvatarModal && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowAvatarModal(false)}
+            >
+              <div
+                className={`${theme === 'dark' ? 'bg-[#452829]' : 'bg-[#F3E8DF]'} p-8 rounded-3xl border border-[#E8D1C5]/20 w-full max-w-sm shadow-2xl relative`}
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className={`text-2xl font-bold ${accentText}`}>Choose Avatar</h3>
+                  <button onClick={() => setShowAvatarModal(false)}><X className={`w-6 h-6 ${textMain}`} /></button>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  {['🐼', '🦊', '🐯', '🦁', '🐰', '🐨', '🦄', '🐸', '🐙'].map(emoji => (
+                    <button
+                      key={emoji}
+                      onClick={() => handleUpdateAvatar(emoji)}
+                      className={`text-4xl p-4 rounded-2xl hover:bg-[#E8D1C5]/20 transition-all hover:scale-110 active:scale-95 border border-transparent hover:border-[#E8D1C5]/30 flex items-center justify-center ${currentUser?.avatar === emoji ? 'bg-[#E8D1C5]/30 border-[#E8D1C5]' : ''}`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
               </div>
             </motion.div>
           )}
