@@ -1,26 +1,119 @@
 @import "tailwindcss";
 
 :root {
+  /* Light Mode Palette (Default) */
   --background: #ffffff;
-  --foreground: #171717;
+  /* White */
+  --foreground: #18181b;
+  /* Zinc-900 */
+
+  --card: #f4f4f5;
+  /* Zinc-100 */
+  --card-foreground: #18181b;
+  /* Zinc-900 */
+
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+
+  --primary: #10b981;
+  /* Emerald-500 */
+  --primary-foreground: #ffffff;
+
+  --secondary: #e4e4e7;
+  /* Zinc-200 */
+  --secondary-foreground: #18181b;
+
+  --muted: #f4f4f5;
+  /* Zinc-100 */
+  --muted-foreground: #71717a;
+  /* Zinc-500 */
+
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+
+  --border: #e4e4e7;
+  /* Zinc-200 */
+  --input: #e4e4e7;
+  --ring: #10b981;
+}
+
+.dark {
+  /* Dark Mode Palette (Current/Modern Minimalist) */
+  --background: #09090b;
+  /* Zinc-950 */
+  --foreground: #fafafa;
+  /* Zinc-50 */
+
+  --card: #18181b;
+  /* Zinc-900 */
+  --card-foreground: #fafafa;
+
+  --popover: #18181b;
+  --popover-foreground: #fafafa;
+
+  --primary: #10b981;
+  /* Emerald-500 */
+  --primary-foreground: #ffffff;
+
+  --secondary: #27272a;
+  /* Zinc-800 */
+  --secondary-foreground: #fafafa;
+
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  /* Zinc-400 */
+
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+
+  --border: #27272a;
+  /* Zinc-800 */
+  --input: #27272a;
+  --ring: #10b981;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Minimalist Utilities */
+.glass {
+  background: rgba(24, 24, 27, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-card {
+  @apply bg-card border border-border shadow-sm;
 }

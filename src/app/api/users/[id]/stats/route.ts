@@ -84,9 +84,22 @@ export async function GET(
             .sort((a, b) => b.value - a.value)
             .slice(0, 5);
 
+        // Process for By Category (NEW)
+        const categoryDataMap = new Map<string, number>();
+        splits.forEach(split => {
+            const category = split.expense.category || 'other';
+            const current = categoryDataMap.get(category) || 0;
+            categoryDataMap.set(category, current + split.amount);
+        });
+
+        const categoryData = Array.from(categoryDataMap.entries())
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value);
+
         return NextResponse.json({
             monthly: monthlyData,
-            byGroup: groupData
+            byGroup: groupData,
+            byCategory: categoryData
         });
 
     } catch (error) {

@@ -36,13 +36,13 @@ export async function POST(req: Request) {
             email,
             'Reset your SlipWise Password',
             `
-            <div style="font-family: Arial, sans-serif; color: #333;">
-                <h2>Password Reset Request</h2>
+            <div style="font-family: Arial, sans-serif; color: #18181b; padding: 20px;">
+                <h2 style="color: #10b981;">Password Reset Request</h2>
                 <p>Hello ${user.name},</p>
                 <p>We received a request to reset your password for your SlipWise account.</p>
                 <p>Click the button below to set a new password:</p>
-                <a href="${resetUrl}" style="background-color: #E8D1C5; color: #452829; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin: 10px 0;">Reset Password</a>
-                <p>If you didn't request this, you can safely ignore this email.</p>
+                <a href="${resetUrl}" style="background-color: #10b981; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin: 20px 0;">Reset Password</a>
+                <p style="color: #71717a; font-size: 14px;">If you didn't request this, you can safely ignore this email.</p>
                 <p>Thanks,<br/>The SlipWise Team</p>
             </div>
             `
