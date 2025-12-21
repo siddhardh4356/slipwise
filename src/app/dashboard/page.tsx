@@ -527,24 +527,26 @@ export default function Dashboard() {
           >
             <Settings className="w-5 h-5" /> Settings
           </button>
-
-          <div className="flex items-center gap-3 px-4 py-3 bg-[#E8D1C5]/5 rounded-xl">
-            <div className="w-10 h-10 rounded-full bg-[#E8D1C5] text-[#452829] flex items-center justify-center font-bold shadow-md">
-              {currentUser.name[0]}
-            </div>
-            <div className="overflow-hidden">
-              <p className="font-bold truncate">{currentUser.name}</p>
-              <p className={`text-xs ${accentText} truncate opacity-60`}>{currentUser.email}</p>
-            </div>
-          </div>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
-        <header className="flex justify-between items-center mb-8 md:hidden">
-          <h1 className="text-2xl font-bold text-[#E8D1C5]">SlipWise</h1>
-          <button onClick={handleLogout}><LogOut className="w-6 h-6" /></button>
+        <header className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold text-[#E8D1C5] md:hidden">SlipWise</h1>
+
+          <div className="flex items-center gap-4 ml-auto">
+            <div className="hidden md:flex items-center gap-3 bg-[#E8D1C5]/5 px-4 py-2 rounded-full border border-[#E8D1C5]/10 backdrop-blur-sm">
+              <div className="text-right hidden lg:block">
+                <p className={`font-bold text-sm ${textMain}`}>{currentUser.name}</p>
+                <p className={`text-xs ${accentText} opacity-60`}>{currentUser.email}</p>
+              </div>
+              <div className="w-9 h-9 rounded-full bg-[#E8D1C5] text-[#452829] flex items-center justify-center font-bold shadow-md">
+                {currentUser.name[0]}
+              </div>
+            </div>
+            <button onClick={handleLogout} className="md:hidden"><LogOut className="w-6 h-6" /></button>
+          </div>
         </header>
 
         <AnimatePresence mode="wait">
