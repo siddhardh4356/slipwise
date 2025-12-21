@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { ArrowRight, PieChart, Search, Users, Shield, Zap, LayoutTemplate } from 'lucide-react';
+import { ArrowRight, PieChart, Search, Users, Shield, Zap, LayoutTemplate, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function LandingPage() {
@@ -27,7 +27,7 @@ export default function LandingPage() {
             <nav className="relative z-10 p-6 flex justify-between items-center max-w-7xl mx-auto">
                 <div className="flex items-center gap-2">
                     <div className="w-10 h-10 bg-gradient-to-br from-primary to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                        <PieChart className="w-6 h-6" />
+                        <Wallet className="w-6 h-6" />
                     </div>
                     <span className="text-xl font-bold tracking-tight">SlipWise</span>
                 </div>
@@ -48,9 +48,9 @@ export default function LandingPage() {
                     className="text-center max-w-4xl mx-auto"
                 >
                     {/* <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/50 border border-border mb-8 text-sm font-medium text-muted-foreground">
-                        <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                        V2.0 is now live
-                    </motion.div> */}
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            V2.0 is now live
+          </motion.div> */}
 
                     <motion.h1 variants={itemVariants} className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 bg-gradient-to-b from-foreground to-foreground/50 bg-clip-text text-transparent">
                         Split bills, <br /> not friendships.
