@@ -123,7 +123,7 @@ export default function LandingPage() {
 
             <footer className="border-t border-border mt-20">
                 <div className="max-w-7xl mx-auto px-6 py-12 flex justify-between items-center text-sm text-muted-foreground">
-                    <p>© 2024 SlipWise Inc.</p>
+                    <p>© 2025 SlipWise Inc.</p>
                     <div className="flex gap-6">
                         <a href="#" className="hover:text-foreground">Privacy</a>
                         <a href="#" className="hover:text-foreground">Terms</a>
