@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SplitMate",
+  title: "SlipWise",
   description: "Expense sharing made simple",
 };
 

@@ -87,7 +87,7 @@ export default function LoginPage() {
                 </div>
 
                 <h2 className="text-2xl font-bold text-center mb-2 tracking-tight">Welcome Back</h2>
-                <p className="text-center text-muted-foreground mb-8 text-sm">Sign in to continue to SplitMate</p>
+                <p className="text-center text-muted-foreground mb-8 text-sm">Sign in to continue to SlipWise</p>
 
                 <form onSubmit={handleLogin} className="space-y-4">
                     <div>

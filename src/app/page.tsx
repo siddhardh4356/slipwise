@@ -29,7 +29,7 @@ export default function LandingPage() {
                     <div className="w-10 h-10 bg-gradient-to-br from-primary to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
                         <Wallet className="w-6 h-6" />
                     </div>
-                    <span className="text-xl font-bold tracking-tight">SplitMate</span>
+                    <span className="text-xl font-bold tracking-tight">SlipWise</span>
                 </div>
                 <div className="flex items-center gap-4">
                     <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Log In</Link>
@@ -123,7 +123,7 @@ export default function LandingPage() {
 
             <footer className="border-t border-border mt-20">
                 <div className="max-w-7xl mx-auto px-6 py-12 flex justify-between items-center text-sm text-muted-foreground">
-                    <p>© 2024 SplitMate Inc.</p>
+                    <p>© 2024 SlipWise Inc.</p>
                     <div className="flex gap-6">
                         <a href="#" className="hover:text-foreground">Privacy</a>
                         <a href="#" className="hover:text-foreground">Terms</a>

@@ -561,7 +561,7 @@ export default function Dashboard() {
       {/* Sidebar */}
       <aside className="w-64 bg-card border-r border-border p-6 flex flex-col hidden md:flex">
         <h1 className="text-2xl font-bold text-foreground mb-12 flex items-center gap-2 tracking-tight">
-          <Wallet className="w-8 h-8 text-primary" /> SplitMate
+          <Wallet className="w-8 h-8 text-primary" /> SlipWise
         </h1>
 
         <nav className="space-y-2 flex-1">
@@ -604,7 +604,7 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
         <header className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-primary md:hidden"><Wallet className="inline-block w-6 h-6 mr-2" />SplitMate</h1>
+          <h1 className="text-2xl font-bold text-primary md:hidden"><Wallet className="inline-block w-6 h-6 mr-2" />SlipWise</h1>
 
           <div className="flex items-center gap-4 ml-auto">
             <button
@@ -1145,11 +1145,11 @@ export default function Dashboard() {
 
               <GlassCard>
                 <h3 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-primary" /> About SplitMate
+                  <Zap className="w-5 h-5 text-primary" /> About SlipWise
                 </h3>
                 <div className="space-y-4 text-sm text-muted-foreground">
                   <p>Version 2.0.0 (Minimalist Edition)</p>
-                  <p>SplitMate makes splitting expenses easy and fun.</p>
+                  <p>SlipWise makes splitting expenses easy and fun.</p>
                   <div className="pt-4 border-t border-border">
                     <button className="text-red-400 hover:text-red-500 font-bold flex items-center gap-2" onClick={() => setShowLogoutConfirm(true)}>
                       <LogOut className="w-4 h-4" /> Log Out

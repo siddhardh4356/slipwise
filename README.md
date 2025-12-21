@@ -1,4 +1,4 @@
-# 💸 SplitMate
+# 💸 SlipWise
 
 A modern, full-stack expense-splitting application built with Next.js 15, MongoDB, and TypeScript. Split bills effortlessly with friends, roommates, or travel companions.
 
