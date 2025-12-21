@@ -31,8 +31,7 @@ export async function GET() {
                     created_by_id: group.created_by_id,
                     created_at: group.created_at,
                     members: members.map(m => {
-                        // @ts-ignore
-                        const user = m.user_id;
+                        const user = m.user_id as any;
                         return {
                             user: {
                                 id: user._id,

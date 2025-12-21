@@ -16,12 +16,9 @@ export async function GET() {
             .populate({ path: 'group_id', model: Group, select: 'id name' });
 
         return NextResponse.json(settlements.map(s => {
-            // @ts-ignore
-            const from = s.from_user_id;
-            // @ts-ignore
-            const to = s.to_user_id;
-            // @ts-ignore
-            const group = s.group_id;
+            const from = s.from_user_id as any;
+            const to = s.to_user_id as any;
+            const group = s.group_id as any;
 
             return {
                 id: s._id,

@@ -41,8 +41,7 @@ export async function GET(
             name: group.name,
             created_at: group.created_at,
             members: members.map(m => {
-                // @ts-ignore
-                const user = m.user_id;
+                const user = m.user_id as any;
                 return {
                     user: {
                         id: user._id,
@@ -52,8 +51,7 @@ export async function GET(
                 };
             }),
             expenses: expenses.map(e => {
-                // @ts-ignore
-                const payer = e.paid_by_id;
+                const payer = e.paid_by_id as any;
                 return {
                     id: e._id,
                     description: e.description,
