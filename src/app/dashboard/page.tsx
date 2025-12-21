@@ -32,6 +32,17 @@ type Expense = { id: string; description: string; amount: number; paidBy: User; 
 type Balance = { fromUserId: string; fromUserName: string; toUserId: string; toUserName: string; amount: number };
 type Request = { id: string; user_id: string; name: string; email: string; created_at: string };
 type ActivityItem = { id: string; type: 'expense' | 'settlement' | 'member_joined'; description: string; amount?: number; userName: string; groupName: string; createdAt: string };
+type Transaction = {
+  id: string;
+  type: 'expense' | 'settlement';
+  description: string;
+  amount: number;
+  fromUser?: { id: string; name: string };
+  toUser?: { id: string; name: string };
+  paidBy?: { id: string; name: string };
+  category?: string;
+  createdAt: string;
+};
 
 // Expense Categories
 const EXPENSE_CATEGORIES = [
@@ -70,6 +81,7 @@ export default function Dashboard() {
   const [groupExpenses, setGroupExpenses] = useState<Expense[]>([]);
   const [groupBalances, setGroupBalances] = useState<Balance[]>([]);
   const [groupRequests, setGroupRequests] = useState<Request[]>([]);
+  const [groupTransactions, setGroupTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Forms
@@ -192,20 +204,33 @@ export default function Dashboard() {
   const fetchGroupDetails = async (groupId: string) => {
     setLoading(true);
     try {
-      const [expensesRes, balancesRes] = await Promise.all([
+      // Fetch all data in parallel including fresh group data and transactions
+      const [expensesRes, balancesRes, groupsRes, transactionsRes] = await Promise.all([
         fetch(`/api/groups/${groupId}/expenses`),
-        fetch(`/api/groups/${groupId}/balances`)
+        fetch(`/api/groups/${groupId}/balances`),
+        fetch('/api/groups'),
+        fetch(`/api/groups/${groupId}/transactions`)
       ]);
+
       setGroupExpenses(await expensesRes.json());
       const balanceData = await balancesRes.json();
       setGroupBalances(balanceData.balances || []);
 
-      const group = groups.find(g => g.id === groupId);
-      if (group) {
-        setSelectedGroup(group);
-        if (group.created_by_id === currentUser?.id) {
-          const reqRes = await fetch(`/api/groups/${groupId}/requests`);
-          if (reqRes.ok) setGroupRequests(await reqRes.json());
+      // Set transactions
+      const transactionsData = await transactionsRes.json();
+      setGroupTransactions(Array.isArray(transactionsData) ? transactionsData : []);
+
+      // Get fresh groups data and find the selected group
+      const freshGroups = await groupsRes.json();
+      if (Array.isArray(freshGroups)) {
+        setGroups(freshGroups);
+        const group = freshGroups.find((g: Group) => g.id === groupId);
+        if (group) {
+          setSelectedGroup(group);
+          if (group.created_by_id === currentUser?.id) {
+            const reqRes = await fetch(`/api/groups/${groupId}/requests`);
+            if (reqRes.ok) setGroupRequests(await reqRes.json());
+          }
         }
       }
     } finally {
@@ -263,7 +288,10 @@ export default function Dashboard() {
       toast.success(`Request ${action}D`);
       setGroupRequests(prev => prev.filter(r => r.id !== requestId));
       setPendingRequestsCount(prev => Math.max(0, prev - 1));
-      if (action === 'APPROVE' && selectedGroup) fetchGroupDetails(selectedGroup.id);
+      // Refresh current group details (also refreshes groups list with new member)
+      if (action === 'APPROVE' && selectedGroup) {
+        fetchGroupDetails(selectedGroup.id);
+      }
     }
   };
 
@@ -910,12 +938,15 @@ export default function Dashboard() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded text-xs">₹{b.amount}</span>
-                                <button
-                                  onClick={() => handleSettleUp(b)}
-                                  className="opacity-0 group-hover:opacity-100 px-2 py-1 bg-emerald-500 text-white text-xs font-bold rounded hover:bg-emerald-600 transition-all flex items-center gap-1"
-                                >
-                                  <Zap className="w-3 h-3" /> Settle
-                                </button>
+                                {/* Only show Settle button if current user is the debtor */}
+                                {b.fromUserId === currentUser?.id && (
+                                  <button
+                                    onClick={() => handleSettleUp(b)}
+                                    className="opacity-0 group-hover:opacity-100 px-2 py-1 bg-emerald-500 text-white text-xs font-bold rounded hover:bg-emerald-600 transition-all flex items-center gap-1"
+                                  >
+                                    <Zap className="w-3 h-3" /> Settle
+                                  </button>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -924,6 +955,70 @@ export default function Dashboard() {
                     )}
                   </GlassCard>
                 </div>
+              </div>
+
+              {/* Transaction History */}
+              <div className="mt-8">
+                <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-muted-foreground" /> Transaction History
+                </h3>
+                <GlassCard>
+                  {groupTransactions.length === 0 ? (
+                    <div className="text-center py-6 text-muted-foreground">
+                      No transactions yet
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                      {groupTransactions.map((tx) => {
+                        if (tx.type === 'expense') {
+                          const category = EXPENSE_CATEGORIES.find(c => c.id === tx.category) || EXPENSE_CATEGORIES[8];
+                          const CategoryIcon = category.icon;
+                          return (
+                            <div key={tx.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                                  style={{ backgroundColor: `${category.color}20` }}
+                                >
+                                  <CategoryIcon className="w-5 h-5" style={{ color: category.color }} />
+                                </div>
+                                <div>
+                                  <p className="font-bold text-foreground text-sm">{tx.description}</p>
+                                  <p className="text-xs text-muted-foreground">Paid by {tx.paidBy?.name || 'Unknown'}</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <span className="font-bold text-foreground">₹{tx.amount}</span>
+                                <p className="text-xs text-muted-foreground">{new Date(tx.createdAt).toLocaleDateString()}</p>
+                              </div>
+                            </div>
+                          );
+                        } else {
+                          // Settlement
+                          return (
+                            <div key={tx.id} className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors border border-emerald-500/20">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                                  <Zap className="w-5 h-5 text-emerald-500" />
+                                </div>
+                                <div>
+                                  <p className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">Settlement</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {tx.fromUser?.name || 'Someone'} paid {tx.toUser?.name || 'someone'}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <span className="font-bold text-emerald-500">₹{tx.amount}</span>
+                                <p className="text-xs text-muted-foreground">{new Date(tx.createdAt).toLocaleDateString()}</p>
+                              </div>
+                            </div>
+                          );
+                        }
+                      })}
+                    </div>
+                  )}
+                </GlassCard>
               </div>
             </motion.div>
           )}

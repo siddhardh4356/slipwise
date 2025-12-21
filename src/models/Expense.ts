@@ -7,6 +7,7 @@ export interface IExpense {
     split_type: 'EQUAL' | 'EXACT' | 'PERCENTAGE';
     paid_by_id: string;
     group_id: string;
+    category?: string;
     created_at: Date;
 }
 
@@ -17,6 +18,7 @@ const ExpenseSchema = new Schema<IExpense>({
     split_type: { type: String, enum: ['EQUAL', 'EXACT', 'PERCENTAGE'], required: true },
     paid_by_id: { type: String, required: true, ref: 'User' },
     group_id: { type: String, required: true, ref: 'Group' },
+    category: { type: String, default: 'other' },
     created_at: { type: Date, default: Date.now },
 }, {
     timestamps: false
