@@ -527,10 +527,6 @@ export default function Dashboard() {
           >
             <Settings className="w-5 h-5" /> Settings
           </button>
-          <button onClick={toggleTheme} className={`w-full flex items-center gap-3 px-4 py-2 ${accentText} hover:bg-[#E8D1C5]/10 rounded-lg transition-colors`}>
-            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-          </button>
 
           <div className="flex items-center gap-3 px-4 py-3 bg-[#E8D1C5]/5 rounded-xl">
             <div className="w-10 h-10 rounded-full bg-[#E8D1C5] text-[#452829] flex items-center justify-center font-bold shadow-md">
@@ -541,9 +537,6 @@ export default function Dashboard() {
               <p className={`text-xs ${accentText} truncate opacity-60`}>{currentUser.email}</p>
             </div>
           </div>
-          <button onClick={handleLogout} className={`w-full flex items-center gap-2 px-4 py-2 ${accentText} opacity-60 hover:opacity-100 transition-opacity`}>
-            <LogOut className="w-4 h-4" /> Sign Out
-          </button>
         </div>
       </aside>
 
