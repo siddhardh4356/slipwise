@@ -1019,9 +1019,6 @@ export default function Dashboard() {
                   <div>
                     <h4 className={`text-2xl font-bold ${textMain}`}>{currentUser.name}</h4>
                     <p className={`${accentText} opacity-60`}>{currentUser.email}</p>
-                    <button className="mt-2 text-sm text-[#E8D1C5] hover:underline opacity-80 decoration-dotted">
-                      Change Avatar (Coming Soon)
-                    </button>
                   </div>
                 </div>
               </GlassCard>
