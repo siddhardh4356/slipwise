@@ -48,7 +48,6 @@ export async function POST(
 
         return NextResponse.json({
             id: memberId,
-            // @ts-ignore
             user: { id: user._id, name: user.name, email: user.email }
         }, { status: 201 });
     } catch (error) {

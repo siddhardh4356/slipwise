@@ -31,15 +31,13 @@ export async function GET(
                     select: 'id name email'
                 });
 
-                // @ts-ignore
-                const payer = expense.paid_by_id;
+                const payer = expense.paid_by_id as any;
 
                 return {
                     id: expense._id,
                     description: expense.description,
                     amount: Number(expense.amount),
                     splitType: expense.split_type,
-                    // @ts-ignore - payer is populated from User model
                     paidBy: { id: payer._id, name: payer.name, email: payer.email },
                     splits: splits.map(s => {
                         const user = s.user_id as any;
@@ -128,8 +126,7 @@ export async function POST(
             description,
             amount,
             splitType,
-            // @ts-ignore
-            paidBy: { id: payer._id, name: payer.name, email: payer.email },
+            paidBy: { id: (payer as any)._id, name: (payer as any).name, email: (payer as any).email },
             splits: calculatedSplits.map(s => ({ userId: s.userId, amount: s.amount }))
         }, { status: 201 });
     } catch (error) {

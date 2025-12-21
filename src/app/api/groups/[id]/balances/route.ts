@@ -72,18 +72,18 @@ async function calculateGroupBalances(groupId: string): Promise<Balance[]> {
     });
 
     for (const expense of expenses) {
-        const payerId = expense.paid_by_id.toString();
-        // @ts-ignore
-        userNames.set(payerId, expense.paid_by_id.name);
+        const payer = expense.paid_by_id as any;
+        const payerId = payer._id?.toString() || expense.paid_by_id.toString();
+        userNames.set(payerId, payer.name);
 
         const splits = splitsByExpense.get(expense._id.toString()) || [];
 
         for (const split of splits) {
-            const splitUserId = split.user_id._id.toString();
+            const splitUser = split.user_id as any;
+            const splitUserId = splitUser._id?.toString() || split.user_id.toString();
             if (splitUserId === payerId) continue;
 
-            // @ts-ignore
-            userNames.set(splitUserId, split.user_id.name);
+            userNames.set(splitUserId, splitUser.name);
 
             const key = `${splitUserId}->${payerId}`;
             const reverseKey = `${payerId}->${splitUserId}`;
@@ -105,17 +105,16 @@ async function calculateGroupBalances(groupId: string): Promise<Balance[]> {
         }
     }
 
-    // Process settlements
     for (const settlement of settlements) {
-        const fromId = settlement.from_user_id.toString();
-        const toId = settlement.to_user_id.toString();
+        const fromUser = settlement.from_user_id as any;
+        const toUser = settlement.to_user_id as any;
+        const fromId = fromUser._id?.toString() || settlement.from_user_id.toString();
+        const toId = toUser._id?.toString() || settlement.to_user_id.toString();
 
         const key = `${fromId}->${toId}`;
 
-        // @ts-ignore
-        userNames.set(fromId, settlement.from_user_id.name);
-        // @ts-ignore
-        userNames.set(toId, settlement.to_user_id.name);
+        userNames.set(fromId, fromUser.name);
+        userNames.set(toId, toUser.name);
 
         if (netBalances.has(key)) {
             const current = netBalances.get(key)!;
