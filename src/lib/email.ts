@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 export const sendEmail = async (to: string, subject: string, html: string) => {
     try {
         const info = await transporter.sendMail({
-            from: `"SlipWise" <${process.env.EMAIL_USER}>`,
+            from: `"SplitMate" <${process.env.EMAIL_USER}>`,
             to,
             subject,
             html,

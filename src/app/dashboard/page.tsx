@@ -561,7 +561,7 @@ export default function Dashboard() {
       {/* Sidebar */}
       <aside className="w-64 bg-card border-r border-border p-6 flex flex-col hidden md:flex">
         <h1 className="text-2xl font-bold text-foreground mb-12 flex items-center gap-2 tracking-tight">
-          <Wallet className="w-8 h-8 text-primary" /> SlipWise
+          <Wallet className="w-8 h-8 text-primary" /> SplitMate
         </h1>
 
         <nav className="space-y-2 flex-1">
@@ -604,7 +604,7 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
         <header className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-primary md:hidden"><Wallet className="inline-block w-6 h-6 mr-2" />SlipWise</h1>
+          <h1 className="text-2xl font-bold text-primary md:hidden"><Wallet className="inline-block w-6 h-6 mr-2" />SplitMate</h1>
 
           <div className="flex items-center gap-4 ml-auto">
             <button
@@ -659,7 +659,7 @@ export default function Dashboard() {
               </div>
 
               {/* Charts */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 <GlassCard className="h-[400px]">
                   <h3 className="text-lg font-bold mb-6 text-foreground">Monthly Spending</h3>
                   <ResponsiveContainer width="100%" height="90%">
@@ -678,37 +678,6 @@ export default function Dashboard() {
                       />
                       <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorVal)" />
                     </AreaChart>
-                  </ResponsiveContainer>
-                </GlassCard>
-
-                <GlassCard className="h-[400px]">
-                  <h3 className="text-lg font-bold mb-6 text-foreground">Your Spending by Category</h3>
-                  <ResponsiveContainer width="100%" height="90%">
-                    <PieChart>
-                      <Pie
-                        data={categoryStats}
-                        innerRadius={80}
-                        outerRadius={100}
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        {categoryStats.map((entry, index) => {
-                          const cat = EXPENSE_CATEGORIES.find(c => c.id === entry.name);
-                          return (
-                            <Cell key={`cell-${index}`} fill={cat ? cat.color : COLORS[index % COLORS.length]} stroke="none" />
-                          );
-                        })}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', color: '#fff' }}
-                        itemStyle={{ color: '#fff' }}
-                        formatter={(value: any, name: any, props: any) => {
-                          const categoryId = props.payload.name;
-                          const cat = EXPENSE_CATEGORIES.find(c => c.id === categoryId);
-                          return [`₹${value}`, cat ? cat.label : categoryId];
-                        }}
-                      />
-                    </PieChart>
                   </ResponsiveContainer>
                 </GlassCard>
               </div>
@@ -1176,11 +1145,11 @@ export default function Dashboard() {
 
               <GlassCard>
                 <h3 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
-                  <Zap className="w-5 h-5 text-primary" /> About SlipWise
+                  <Zap className="w-5 h-5 text-primary" /> About SplitMate
                 </h3>
                 <div className="space-y-4 text-sm text-muted-foreground">
                   <p>Version 2.0.0 (Minimalist Edition)</p>
-                  <p>SlipWise makes splitting expenses easy and fun.</p>
+                  <p>SplitMate makes splitting expenses easy and fun.</p>
                   <div className="pt-4 border-t border-border">
                     <button className="text-red-400 hover:text-red-500 font-bold flex items-center gap-2" onClick={() => setShowLogoutConfirm(true)}>
                       <LogOut className="w-4 h-4" /> Log Out
