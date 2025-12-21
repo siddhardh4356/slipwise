@@ -6,12 +6,34 @@ import Expense from '@/models/Expense';
 import User from '@/models/User';
 import { generateId } from '@/lib/utils';
 
-// GET /api/groups - Get all groups
+// GET /api/groups - Get groups for current user
 export async function GET() {
     try {
+        // Get current user from auth session
+        const { cookies } = await import('next/headers');
+        const { verifyToken } = await import('@/lib/auth');
+        const cookieStore = await cookies();
+        const token = cookieStore.get('token')?.value;
+
+        if (!token) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const payload = await verifyToken(token);
+        if (!payload || !payload.userId) {
+            return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+        }
+
+        const userId = payload.userId;
+
         await connectDB();
 
-        const groups = await Group.find().sort({ created_at: -1 });
+        // Get group IDs where user is a member
+        const memberships = await GroupMember.find({ user_id: userId });
+        const groupIds = memberships.map(m => m.group_id);
+
+        // Only fetch groups user is a member of
+        const groups = await Group.find({ _id: { $in: groupIds } }).sort({ created_at: -1 });
 
         // Get members and expense count for each group
         const groupsWithMembers = await Promise.all(

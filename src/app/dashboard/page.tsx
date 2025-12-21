@@ -80,6 +80,7 @@ export default function Dashboard() {
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const [expenseDesc, setExpenseDesc] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
@@ -96,6 +97,9 @@ export default function Dashboard() {
   const [monthlyStats, setMonthlyStats] = useState<{ name: string; value: number }[]>([]);
   const [groupStats, setGroupStats] = useState<{ name: string; value: number }[]>([]);
   const [categoryStats, setCategoryStats] = useState<{ name: string; value: number }[]>([]);
+
+  // Pending join requests notification count
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
   // --- Actions & Helpers (Hoisted) ---
   // ... (fetchGroups, etc. remain the same) 
@@ -155,12 +159,25 @@ export default function Dashboard() {
         fetchGroups();
         fetchUserBalances(data.user.id);
         fetchUserStats(data.user.id);
+        fetchPendingRequests(data.user.id);
       } else {
         router.push('/login');
       }
     } catch (error) {
       console.error('Failed to fetch session:', error);
       router.push('/login');
+    }
+  };
+
+  const fetchPendingRequests = async (userId: string) => {
+    try {
+      const res = await fetch(`/api/users/${userId}/pending-requests`);
+      if (res.ok) {
+        const data = await res.json();
+        setPendingRequestsCount(data.count || 0);
+      }
+    } catch (error) {
+      console.error('Failed to fetch pending requests:', error);
     }
   };
 
@@ -245,6 +262,7 @@ export default function Dashboard() {
     if (res.ok) {
       toast.success(`Request ${action}D`);
       setGroupRequests(prev => prev.filter(r => r.id !== requestId));
+      setPendingRequestsCount(prev => Math.max(0, prev - 1));
       if (action === 'APPROVE' && selectedGroup) fetchGroupDetails(selectedGroup.id);
     }
   };
@@ -291,7 +309,10 @@ export default function Dashboard() {
         setExpenseCategory('other');
 
         fetchGroupDetails(selectedGroup.id);
-        if (currentUser) fetchUserBalances(currentUser.id);
+        if (currentUser) {
+          fetchUserBalances(currentUser.id);
+          fetchUserStats(currentUser.id);
+        }
       } else {
         const data = await res.json();
         toast.error(data.error || 'Failed to add expense');
@@ -327,7 +348,10 @@ export default function Dashboard() {
         toast.success('🎉 Debt settled! Great job!');
         setSettlingBalance(null);
         fetchGroupDetails(selectedGroup.id);
-        if (currentUser) fetchUserBalances(currentUser.id);
+        if (currentUser) {
+          fetchUserBalances(currentUser.id);
+          fetchUserStats(currentUser.id);
+        }
       } else {
         toast.error('Failed to settle');
       }
@@ -337,6 +361,7 @@ export default function Dashboard() {
   };
 
   const handleLogout = async () => {
+    setShowLogoutConfirm(false);
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/login');
   };
@@ -522,7 +547,13 @@ export default function Dashboard() {
             onClick={() => setActiveTab('groups')}
             className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-sm font-medium ${activeTab === 'groups' ? 'bg-primary/10 text-primary font-bold' : 'text-muted-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-foreground'}`}
           >
-            <Users className="w-4 h-4" /> Groups
+            <Users className="w-4 h-4" />
+            <span className="flex-1 text-left">Groups</span>
+            {pendingRequestsCount > 0 && (
+              <span className="bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                {pendingRequestsCount}
+              </span>
+            )}
           </button>
           <button
             onClick={() => { setActiveTab('activity'); setSelectedGroup(null); }}
@@ -563,7 +594,7 @@ export default function Dashboard() {
                 {currentUser.avatar ? <span className="text-xl">{currentUser.avatar}</span> : currentUser.name[0]}
               </button>
             </div>
-            <button onClick={handleLogout} className="md:hidden text-muted-foreground hover:text-foreground"><LogOut className="w-5 h-5" /></button>
+            <button onClick={() => setShowLogoutConfirm(true)} className="md:hidden text-muted-foreground hover:text-foreground"><LogOut className="w-5 h-5" /></button>
           </div>
         </header>
 
@@ -623,7 +654,7 @@ export default function Dashboard() {
                 </GlassCard>
 
                 <GlassCard className="h-[400px]">
-                  <h3 className="text-lg font-bold mb-6 text-foreground">Expenses by Category</h3>
+                  <h3 className="text-lg font-bold mb-6 text-foreground">Your Spending by Category</h3>
                   <ResponsiveContainer width="100%" height="90%">
                     <PieChart>
                       <Pie
@@ -1056,7 +1087,7 @@ export default function Dashboard() {
                   <p>Version 2.0.0 (Minimalist Edition)</p>
                   <p>SlipWise makes splitting expenses easy and fun.</p>
                   <div className="pt-4 border-t border-border">
-                    <button className="text-red-400 hover:text-red-500 font-bold flex items-center gap-2" onClick={handleLogout}>
+                    <button className="text-red-400 hover:text-red-500 font-bold flex items-center gap-2" onClick={() => setShowLogoutConfirm(true)}>
                       <LogOut className="w-4 h-4" /> Log Out
                     </button>
                   </div>
@@ -1228,6 +1259,47 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Logout Confirmation Modal */}
+        <AnimatePresence>
+          {showLogoutConfirm && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowLogoutConfirm(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+                className="bg-card p-6 rounded-2xl border border-border w-full max-w-sm shadow-xl"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center mb-4">
+                    <LogOut className="w-8 h-8 text-amber-500" />
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground mb-2">Log Out?</h3>
+                  <p className="text-muted-foreground text-sm mb-6">
+                    Are you sure you want to log out? You'll need to sign in again to access your groups and expenses.
+                  </p>
+                  <div className="flex gap-3 w-full">
+                    <button
+                      onClick={() => setShowLogoutConfirm(false)}
+                      className="flex-1 px-4 py-2.5 bg-secondary text-secondary-foreground rounded-lg font-medium hover:bg-secondary/80 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-all flex items-center justify-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" /> Log Out
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
