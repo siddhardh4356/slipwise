@@ -16,7 +16,11 @@
     "jose": "^6.1.3",
     "lucide-react": "^0.562.0",
     "mongoose": "^8.9.4",
+<<<<<<< HEAD
     "next": "15.5.9",
+=======
+    "next": "15.1.11",
+>>>>>>> 192cb471da45b4c11f970cc177b83679e7d8e0d7
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hot-toast": "^2.6.0",
