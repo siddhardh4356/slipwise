@@ -13,10 +13,24 @@ export default function SignupPage() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validate passwords match
+        if (password !== confirmPassword) {
+            toast.error('Passwords do not match');
+            return;
+        }
+
+        // Validate password length
+        if (password.length < 6) {
+            toast.error('Password must be at least 6 characters');
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -101,12 +115,32 @@ export default function SignupPage() {
                             className="w-full px-4 py-3 bg-[#452829]/50 border border-[#E8D1C5]/20 rounded-xl text-[#F3E8DF] placeholder-[#E8D1C5]/30 focus:outline-none focus:ring-2 focus:ring-[#E8D1C5]/50 transition-all"
                             placeholder="••••••••"
                             required
+                            minLength={6}
                         />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-[#E8D1C5]/80 mb-1 ml-1">Confirm Password</label>
+                        <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className={`w-full px-4 py-3 bg-[#452829]/50 border rounded-xl text-[#F3E8DF] placeholder-[#E8D1C5]/30 focus:outline-none focus:ring-2 transition-all ${confirmPassword && password !== confirmPassword
+                                    ? 'border-red-500/50 focus:ring-red-500/50'
+                                    : 'border-[#E8D1C5]/20 focus:ring-[#E8D1C5]/50'
+                                }`}
+                            placeholder="••••••••"
+                            required
+                            minLength={6}
+                        />
+                        {confirmPassword && password !== confirmPassword && (
+                            <p className="text-red-400 text-sm mt-1 ml-1">Passwords do not match</p>
+                        )}
                     </div>
 
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || (confirmPassword !== '' && password !== confirmPassword)}
                         className="w-full py-4 bg-[#E8D1C5] text-[#452829] rounded-xl font-bold hover:bg-[#F3E8DF] transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
                     >
                         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Get Started'}
@@ -123,3 +157,4 @@ export default function SignupPage() {
         </div>
     );
 }
+

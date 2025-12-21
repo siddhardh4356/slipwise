@@ -4,8 +4,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Wallet, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Wallet, Loader2, X, Mail } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
 export default function LoginPage() {
@@ -13,6 +13,9 @@ export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [forgotEmail, setForgotEmail] = useState('');
+    const [forgotLoading, setForgotLoading] = useState(false);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -37,6 +40,19 @@ export default function LoginPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleForgotPassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setForgotLoading(true);
+
+        // Simulate sending email (in production, you would call an API endpoint)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        toast.success('If an account exists with this email, you will receive a password reset link.');
+        setForgotLoading(false);
+        setShowForgotPassword(false);
+        setForgotEmail('');
     };
 
     return (
@@ -76,7 +92,16 @@ export default function LoginPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-[#E8D1C5]/80 mb-1 ml-1">Password</label>
+                        <div className="flex justify-between items-center mb-1">
+                            <label className="block text-sm font-medium text-[#E8D1C5]/80 ml-1">Password</label>
+                            <button
+                                type="button"
+                                onClick={() => setShowForgotPassword(true)}
+                                className="text-sm text-[#E8D1C5]/60 hover:text-[#E8D1C5] transition-colors"
+                            >
+                                Forgot Password?
+                            </button>
+                        </div>
                         <input
                             type="password"
                             value={password}
@@ -97,12 +122,86 @@ export default function LoginPage() {
                 </form>
 
                 <div className="mt-6 text-center text-[#E8D1C5]/60">
-                    Don't have an account?{' '}
+                    Don&apos;t have an account?{' '}
                     <Link href="/signup" className="text-[#E8D1C5] font-semibold hover:underline">
                         Sign Up
                     </Link>
                 </div>
             </motion.div>
+
+            {/* Forgot Password Modal */}
+            <AnimatePresence>
+                {showForgotPassword && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                        onClick={() => setShowForgotPassword(false)}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-full max-w-md bg-[#452829] border border-[#E8D1C5]/20 rounded-2xl p-6 shadow-2xl"
+                        >
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-bold text-[#F3E8DF]">Reset Password</h3>
+                                <button
+                                    onClick={() => setShowForgotPassword(false)}
+                                    className="text-[#E8D1C5]/60 hover:text-[#E8D1C5] transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div className="flex justify-center mb-4">
+                                <div className="w-12 h-12 bg-[#E8D1C5]/10 rounded-xl flex items-center justify-center border border-[#E8D1C5]/20">
+                                    <Mail className="w-6 h-6 text-[#E8D1C5]" />
+                                </div>
+                            </div>
+
+                            <p className="text-center text-[#E8D1C5]/60 mb-6">
+                                Enter your email address and we&apos;ll send you a link to reset your password.
+                            </p>
+
+                            <form onSubmit={handleForgotPassword} className="space-y-4">
+                                <input
+                                    type="email"
+                                    value={forgotEmail}
+                                    onChange={(e) => setForgotEmail(e.target.value)}
+                                    className="w-full px-4 py-3 bg-[#57595B]/20 border border-[#E8D1C5]/20 rounded-xl text-[#F3E8DF] placeholder-[#E8D1C5]/30 focus:outline-none focus:ring-2 focus:ring-[#E8D1C5]/50 transition-all"
+                                    placeholder="Enter your email"
+                                    required
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={forgotLoading}
+                                    className="w-full py-3 bg-[#E8D1C5] text-[#452829] rounded-xl font-bold hover:bg-[#F3E8DF] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    {forgotLoading ? (
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        'Send Reset Link'
+                                    )}
+                                </button>
+                            </form>
+
+                            <p className="text-center text-[#E8D1C5]/40 text-sm mt-4">
+                                Remember your password?{' '}
+                                <button
+                                    onClick={() => setShowForgotPassword(false)}
+                                    className="text-[#E8D1C5] hover:underline"
+                                >
+                                    Back to login
+                                </button>
+                            </p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
+
