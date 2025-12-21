@@ -47,10 +47,10 @@ export default function LandingPage() {
                     animate="visible"
                     className="text-center max-w-4xl mx-auto"
                 >
-                    <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/50 border border-border mb-8 text-sm font-medium text-muted-foreground">
+                    {/* <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/50 border border-border mb-8 text-sm font-medium text-muted-foreground">
                         <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                         V2.0 is now live
-                    </motion.div>
+                    </motion.div> */}
 
                     <motion.h1 variants={itemVariants} className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 bg-gradient-to-b from-foreground to-foreground/50 bg-clip-text text-transparent">
                         Split bills, <br /> not friendships.
@@ -63,9 +63,6 @@ export default function LandingPage() {
                     <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link href="/signup" className="w-full sm:w-auto bg-primary text-primary-foreground px-8 py-4 rounded-full font-bold text-lg hover:bg-primary/90 transition-all shadow-xl shadow-primary/25 hover:translate-y-[-2px] flex items-center justify-center gap-2">
                             Start Splitting Free <ArrowRight className="w-5 h-5" />
-                        </Link>
-                        <Link href="/login" className="w-full sm:w-auto px-8 py-4 rounded-full font-bold text-lg border border-border hover:bg-secondary/50 transition-all">
-                            View Demo
                         </Link>
                     </motion.div>
                 </motion.div>
