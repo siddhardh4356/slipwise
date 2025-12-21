@@ -28,10 +28,12 @@ export async function GET() {
                     id: group._id, // map _id to id for frontend compatibility
                     name: group.name,
                     join_code: group.join_code,
+                    joinCode: group.join_code, // Also add joinCode for frontend compatibility
                     created_by_id: group.created_by_id,
                     created_at: group.created_at,
                     members: members.map(m => {
                         const user = m.user_id as any;
+                        if (!user) return null;
                         return {
                             user: {
                                 id: user._id,
@@ -39,7 +41,7 @@ export async function GET() {
                                 email: user.email
                             }
                         };
-                    }),
+                    }).filter(Boolean), // Remove null entries
                     _count: { expenses: expenseCount }
                 };
             })

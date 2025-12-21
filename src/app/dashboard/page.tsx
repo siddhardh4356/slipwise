@@ -135,10 +135,27 @@ export default function Dashboard() {
   };
 
   const fetchGroups = async () => {
-    const res = await fetch('/api/groups');
-    const data = await res.json();
-    setGroups(data);
-    setLoading(false);
+    try {
+      const res = await fetch('/api/groups');
+      if (res.ok) {
+        const data = await res.json();
+        // Ensure data is an array before setting
+        if (Array.isArray(data)) {
+          setGroups(data);
+        } else {
+          console.error('Groups API did not return an array:', data);
+          setGroups([]);
+        }
+      } else {
+        console.error('Failed to fetch groups:', res.status);
+        setGroups([]);
+      }
+    } catch (error) {
+      console.error('Error fetching groups:', error);
+      setGroups([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchGroupDetails = async (groupId: string) => {
