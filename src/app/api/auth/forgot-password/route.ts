@@ -29,8 +29,11 @@ export async function POST(req: Request) {
         user.reset_token_expiry = new Date(resetTokenExpiry);
         await user.save();
 
-        // Send email
-        const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+        // Send email - dynamically get the base URL from request headers
+        const host = req.headers.get('host') || 'localhost:3000';
+        const protocol = host.includes('localhost') ? 'http' : 'https';
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
+        const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
         await sendEmail(
             email,
