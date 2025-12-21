@@ -20,16 +20,18 @@ export async function GET() {
         }
 
         const payload = await verifyToken(token);
-        if (!payload || !payload.userId) {
+        if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
 
-        const userId = payload.userId;
+        const userId = payload.id;
+        console.log('Fetching groups for user:', userId);
 
         await connectDB();
 
         // Get group IDs where user is a member
         const memberships = await GroupMember.find({ user_id: userId });
+        console.log('Found memberships:', memberships.length);
         const groupIds = memberships.map(m => m.group_id);
 
         // Only fetch groups user is a member of
