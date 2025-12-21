@@ -21,8 +21,7 @@ export async function GET(
         // Previous structure was flat: { id, user_id, name, email, created_at }
         // We will return a similar structure for compatibility
         const formattedRequests = requests.map(req => {
-            // @ts-ignore
-            const user = req.user_id;
+            const user = req.user_id as any;
             return {
                 id: req._id,
                 user_id: user?._id,
