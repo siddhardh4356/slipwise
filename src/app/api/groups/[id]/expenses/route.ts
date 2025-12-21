@@ -39,10 +39,10 @@ export async function GET(
                     description: expense.description,
                     amount: Number(expense.amount),
                     splitType: expense.split_type,
+                    // @ts-ignore - payer is populated from User model
                     paidBy: { id: payer._id, name: payer.name, email: payer.email },
                     splits: splits.map(s => {
-                        // @ts-ignore
-                        const user = s.user_id;
+                        const user = s.user_id as any;
                         return {
                             user: { id: user._id, name: user.name, email: user.email },
                             amount: Number(s.amount),
