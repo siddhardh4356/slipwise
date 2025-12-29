@@ -113,6 +113,9 @@ export default function Dashboard() {
   // Pending join requests notification count
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
+  // Track if initial URL state has been restored (to prevent overwriting URL on mount)
+  const [initialStateRestored, setInitialStateRestored] = useState(false);
+
   // --- Actions & Helpers (Hoisted) ---
   // ... (fetchGroups, etc. remain the same) 
 
@@ -546,24 +549,9 @@ export default function Dashboard() {
     return () => clearInterval(pollInterval);
   }, [selectedGroup?.id, currentUser?.id]);
 
-  // URL state persistence - save current view to URL
+  // Restore state from URL on initial load (runs once when user is loaded)
   useEffect(() => {
-    if (!mounted) return;
-
-    const params = new URLSearchParams();
-    if (activeTab !== 'dashboard') params.set('tab', activeTab);
-    if (selectedGroup) params.set('group', selectedGroup.id);
-
-    const newUrl = params.toString()
-      ? `${window.location.pathname}?${params.toString()}`
-      : window.location.pathname;
-
-    window.history.replaceState({}, '', newUrl);
-  }, [activeTab, selectedGroup?.id, mounted]);
-
-  // Restore state from URL on initial load
-  useEffect(() => {
-    if (!mounted || !currentUser) return;
+    if (!mounted || !currentUser || initialStateRestored) return;
 
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab') as 'dashboard' | 'groups' | 'activity' | 'settings' | null;
@@ -576,7 +564,25 @@ export default function Dashboard() {
       setActiveTab('groups');
       fetchGroupDetails(groupId);
     }
-  }, [mounted, currentUser?.id]);
+
+    // Mark initial state as restored
+    setInitialStateRestored(true);
+  }, [mounted, currentUser?.id, initialStateRestored]);
+
+  // URL state persistence - save current view to URL (only after initial restore)
+  useEffect(() => {
+    if (!mounted || !initialStateRestored) return;
+
+    const params = new URLSearchParams();
+    if (activeTab !== 'dashboard') params.set('tab', activeTab);
+    if (selectedGroup) params.set('group', selectedGroup.id);
+
+    const newUrl = params.toString()
+      ? `${window.location.pathname}?${params.toString()}`
+      : window.location.pathname;
+
+    window.history.replaceState({}, '', newUrl);
+  }, [activeTab, selectedGroup?.id, mounted, initialStateRestored]);
 
   // Search Handler
   const handleSearchSelect = (result: any) => { // Type as any for now to avoid circular deps or re-declaring types
