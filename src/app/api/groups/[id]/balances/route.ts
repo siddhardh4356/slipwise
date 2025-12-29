@@ -104,25 +104,44 @@ async function calculateGroupBalances(groupId: string): Promise<Balance[]> {
             }
         }
     }
-
+    // Apply settlements to net balances
     for (const settlement of settlements) {
         const fromUser = settlement.from_user_id as any;
         const toUser = settlement.to_user_id as any;
         const fromId = fromUser._id?.toString() || settlement.from_user_id.toString();
         const toId = toUser._id?.toString() || settlement.to_user_id.toString();
 
-        const key = `${fromId}->${toId}`;
-
         userNames.set(fromId, fromUser.name);
         userNames.set(toId, toUser.name);
 
+        const key = `${fromId}->${toId}`;
+        const reverseKey = `${toId}->${fromId}`;
+        const settlementAmount = Number(settlement.amount);
+
         if (netBalances.has(key)) {
+            // From owes To (matching direction): settlement reduces what From owes
             const current = netBalances.get(key)!;
-            if (current > settlement.amount) {
-                netBalances.set(key, current - Number(settlement.amount));
+            if (current > settlementAmount) {
+                netBalances.set(key, current - settlementAmount);
+            } else if (current < settlementAmount) {
+                // Over-settlement: From paid more than they owed, so now To owes From the excess
+                netBalances.delete(key);
+                const excess = settlementAmount - current;
+                const existingReverse = netBalances.get(reverseKey) || 0;
+                netBalances.set(reverseKey, existingReverse + excess);
             } else {
+                // Exact settlement - debt is fully cleared
                 netBalances.delete(key);
             }
+        } else if (netBalances.has(reverseKey)) {
+            // To owes From (reverse direction): From paying To increases what To owes
+            // This means From paid when they should have received, so To owes even more
+            const current = netBalances.get(reverseKey)!;
+            netBalances.set(reverseKey, current + settlementAmount);
+        } else {
+            // No existing balance in either direction
+            // From paid To when there was no debt, so now To owes From
+            netBalances.set(reverseKey, settlementAmount);
         }
     }
 

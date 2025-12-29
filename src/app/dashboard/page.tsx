@@ -911,7 +911,7 @@ export default function Dashboard() {
                                 {b.fromUserId === currentUser?.id && (
                                   <button
                                     onClick={() => handleSettleUp(b)}
-                                    className="opacity-0 group-hover:opacity-100 px-2 py-1 bg-emerald-500 text-white text-xs font-bold rounded hover:bg-emerald-600 transition-all flex items-center gap-1"
+                                    className="px-2 py-1 bg-emerald-500 text-white text-xs font-bold rounded hover:bg-emerald-600 transition-all flex items-center gap-1 cursor-pointer"
                                   >
                                     <Zap className="w-3 h-3" /> Settle
                                   </button>
