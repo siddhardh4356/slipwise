@@ -517,6 +517,67 @@ export default function Dashboard() {
     return () => document.removeEventListener('keydown', down);
   }, []);
 
+  // Auto-refresh polling when viewing a group
+  useEffect(() => {
+    if (!selectedGroup || !currentUser) return;
+
+    const pollInterval = setInterval(() => {
+      // Silently refresh group data without setting loading state
+      Promise.all([
+        fetch(`/api/groups/${selectedGroup.id}/expenses`),
+        fetch(`/api/groups/${selectedGroup.id}/balances`),
+        fetch(`/api/groups/${selectedGroup.id}/transactions`)
+      ]).then(async ([expensesRes, balancesRes, transactionsRes]) => {
+        if (expensesRes.ok) setGroupExpenses(await expensesRes.json());
+        if (balancesRes.ok) {
+          const data = await balancesRes.json();
+          setGroupBalances(data.balances || []);
+        }
+        if (transactionsRes.ok) {
+          const data = await transactionsRes.json();
+          setGroupTransactions(Array.isArray(data) ? data : []);
+        }
+      }).catch(() => { }); // Silently ignore polling errors
+
+      // Also refresh user balances for dashboard
+      fetchUserBalances(currentUser.id);
+    }, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [selectedGroup?.id, currentUser?.id]);
+
+  // URL state persistence - save current view to URL
+  useEffect(() => {
+    if (!mounted) return;
+
+    const params = new URLSearchParams();
+    if (activeTab !== 'dashboard') params.set('tab', activeTab);
+    if (selectedGroup) params.set('group', selectedGroup.id);
+
+    const newUrl = params.toString()
+      ? `${window.location.pathname}?${params.toString()}`
+      : window.location.pathname;
+
+    window.history.replaceState({}, '', newUrl);
+  }, [activeTab, selectedGroup?.id, mounted]);
+
+  // Restore state from URL on initial load
+  useEffect(() => {
+    if (!mounted || !currentUser) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab') as 'dashboard' | 'groups' | 'activity' | 'settings' | null;
+    const groupId = params.get('group');
+
+    if (tab && ['dashboard', 'groups', 'activity', 'settings'].includes(tab)) {
+      setActiveTab(tab);
+    }
+    if (groupId) {
+      setActiveTab('groups');
+      fetchGroupDetails(groupId);
+    }
+  }, [mounted, currentUser?.id]);
+
   // Search Handler
   const handleSearchSelect = (result: any) => { // Type as any for now to avoid circular deps or re-declaring types
     if (result.type === 'group') {
