@@ -612,7 +612,7 @@ export default function Dashboard() {
   if (!mounted) return null;
 
   // --- Charts Data & Render ---
-  const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'];
+  const COLORS = ['#b91010ff', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'];
 
   if (!currentUser) return null;
 
